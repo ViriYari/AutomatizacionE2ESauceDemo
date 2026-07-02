@@ -2,30 +2,20 @@
  * Pipeline E2E — Sauce Demo
  * Reto 2: Stage 1 Serenity (Java) + Stage 2 Playwright (Python)
  *
- * Configuración del job en Jenkins:
- *   - Tipo: Pipeline
- *   - Definition: Pipeline script from SCM
- *   - Script Path: Jenkinsfile
- *   - Branch: main
+ * Jenkins — configuración requerida (Windows):
+ *   1. Manage Jenkins → Global Tool Configuration → Maven → Add "Maven-3.9"
+ *   2. Instalar Python 3.10+ y marcar "Add to PATH" (reiniciar servicio Jenkins)
+ *   3. Job Pipeline: Branch */main, Script Path: Jenkinsfile
  *
- * Plugins requeridos: Pipeline, Git, HTML Publisher, JUnit, Workspace Cleanup
- *
- * Herramientas (opcional — descomentar bloque tools{} si están en Global Tool Configuration):
- *   - JDK-11
- *   - Maven-3.9
- *
- * En el agente deben estar disponibles: Java 11+, Maven 3.8+, Python 3.10+, Chrome/Chromium
+ * Plugins: Pipeline, Git, HTML Publisher, JUnit, Workspace Cleanup
  */
 
 pipeline {
     agent any
 
-    /*
     tools {
-        jdk 'JDK-11'
         maven 'Maven-3.9'
     }
-    */
 
     options {
         timestamps()
@@ -38,17 +28,22 @@ pipeline {
         string(
             name: 'CUCUMBER_TAGS',
             defaultValue: '',
-            description: 'Tags Cucumber opcionales para Serenity. Ejemplo: @Login. Vacío = todos los escenarios.'
+            description: 'Tags Cucumber opcionales para Serenity. Ejemplo: @Login. Vacío = todos.'
         )
         booleanParam(
             name: 'HEADLESS',
             defaultValue: true,
-            description: 'Ejecutar navegadores en modo headless (recomendado en CI).'
+            description: 'Ejecutar navegadores en modo headless.'
+        )
+        string(
+            name: 'PYTHON_CMD',
+            defaultValue: 'py -3',
+            description: 'Comando Python en Windows (ej. py -3, python, C:\\Python311\\python.exe).'
         )
         booleanParam(
             name: 'SKIP_CLEANUP',
             defaultValue: false,
-            description: 'Conservar el workspace al finalizar (útil para depuración).'
+            description: 'Conservar el workspace al finalizar.'
         )
     }
 
@@ -70,30 +65,25 @@ pipeline {
 
         stage('Verificar entorno') {
             steps {
-                script {
-                    if (isUnix()) {
-                        sh '''
-                            set -e
-                            echo "=== Verificando entorno (Linux/macOS) ==="
-                            java -version
-                            mvn -version
-                            python3 --version || python --version
-                            if command -v google-chrome >/dev/null 2>&1; then
-                                google-chrome --version
-                            elif command -v chromium-browser >/dev/null 2>&1; then
-                                chromium-browser --version
-                            else
-                                echo "Chrome/Chromium no detectado en PATH"
-                            fi
-                        '''
-                    } else {
-                        bat '''
-                            @echo off
-                            echo === Verificando entorno (Windows) ===
-                            java -version
-                            call mvn -version
-                            python --version
-                        '''
+                catchError(buildResult: null, stageResult: 'UNSTABLE') {
+                    script {
+                        if (isUnix()) {
+                            sh '''
+                                echo "=== Verificando entorno (Linux/macOS) ==="
+                                java -version || echo "ADVERTENCIA: Java no encontrado"
+                                mvn -version || echo "ADVERTENCIA: Maven no encontrado"
+                                python3 --version || python --version || echo "ADVERTENCIA: Python no encontrado"
+                            '''
+                        } else {
+                            bat """
+                                @echo off
+                                echo === Verificando entorno (Windows) ===
+                                java -version || echo ADVERTENCIA: Java no encontrado
+                                call mvn -version || echo ADVERTENCIA: Maven no encontrado
+                                ${params.PYTHON_CMD} --version || echo ADVERTENCIA: Python no encontrado
+                                exit /b 0
+                            """
+                        }
                     }
                 }
             }
@@ -120,12 +110,14 @@ pipeline {
                                 """
                             } else {
                                 bat """
-                                    mvn --batch-mode dependency:resolve dependency:resolve-plugins
-                                    mvn --batch-mode clean test ^
+                                    call mvn --batch-mode dependency:resolve dependency:resolve-plugins
+                                    if errorlevel 1 exit /b 1
+                                    call mvn --batch-mode clean test ^
                                         ${environmentFlag} ^
                                         ${tagsFlag} ^
                                         -Dwebdriver.driver=chrome ^
                                         -Dsurefire.printSummary=true
+                                    if errorlevel 1 exit /b 1
                                 """
                             }
                         }
@@ -173,14 +165,16 @@ pipeline {
                                     pytest
                                 '''
                             } else {
-                                bat '''
-                                    python -m venv .venv
+                                bat """
+                                    ${params.PYTHON_CMD} -m venv .venv
+                                    if errorlevel 1 exit /b 1
                                     call .venv\\Scripts\\activate.bat
                                     pip install --upgrade pip
                                     pip install -r requirements.txt
                                     playwright install chromium
                                     pytest
-                                '''
+                                    if errorlevel 1 exit /b 1
+                                """
                             }
                         }
                     }
@@ -240,15 +234,11 @@ pipeline {
 
     post {
         success {
-            echo 'Pipeline completado. Revisa Serenity BDD Report y Playwright Report en este build.'
-        }
-
-        unstable {
-            echo 'Pipeline inestable: revisa pruebas fallidas o reportes incompletos.'
+            echo 'Pipeline completado. Revisa Serenity BDD Report y Playwright Report.'
         }
 
         failure {
-            echo 'Pipeline fallido. Revisa Console Output de Stage 1 (Serenity) y Stage 2 (Playwright).'
+            echo 'Pipeline fallido. Verifica Maven (Global Tool Configuration) y Python en el agente Jenkins.'
         }
 
         always {
