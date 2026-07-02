@@ -12,31 +12,39 @@ ALLURE_RESULTS = ROOT / "reports" / "allure-results"
 ALLURE_REPORT = ROOT / "reports" / "allure-report"
 
 
+def allure_commands(results_dir: Path, report_dir: Path) -> list[list[str]]:
+    commands: list[list[str]] = []
+    allure_exe = shutil.which("allure")
+    npx_exe = shutil.which("npx")
+    if allure_exe:
+        commands.append(
+            [allure_exe, "generate", str(results_dir), "-o", str(report_dir), "--clean"]
+        )
+    if npx_exe:
+        commands.append(
+            [
+                npx_exe,
+                "--yes",
+                "allure-commandline",
+                "generate",
+                str(results_dir),
+                "-o",
+                str(report_dir),
+                "--clean",
+            ]
+        )
+    return commands
+
+
 def main() -> int:
     if not ALLURE_RESULTS.exists() or not any(ALLURE_RESULTS.iterdir()):
         print("No hay resultados en reports/allure-results. Ejecuta pytest primero.")
         return 1
 
     ALLURE_REPORT.mkdir(parents=True, exist_ok=True)
-    commands = [
-        ["allure", "generate", str(ALLURE_RESULTS), "-o", str(ALLURE_REPORT), "--clean"],
-        [
-            "npx",
-            "--yes",
-            "allure-commandline",
-            "generate",
-            str(ALLURE_RESULTS),
-            "-o",
-            str(ALLURE_REPORT),
-            "--clean",
-        ],
-    ]
+    commands = allure_commands(ALLURE_RESULTS, ALLURE_REPORT)
 
     for cmd in commands:
-        if cmd[0] != "npx" and not shutil.which(cmd[0]):
-            continue
-        if cmd[0] == "npx" and not shutil.which("npx"):
-            continue
         try:
             print(f"Ejecutando: {' '.join(cmd)}")
             result = subprocess.run(cmd, cwd=ROOT)

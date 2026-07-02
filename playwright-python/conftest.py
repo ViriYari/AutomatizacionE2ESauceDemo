@@ -40,24 +40,28 @@ def generate_allure_html() -> None:
         return
 
     ALLURE_REPORT_DIR.mkdir(parents=True, exist_ok=True)
-    commands = [
-        ["allure", "generate", str(ALLURE_RESULTS_DIR), "-o", str(ALLURE_REPORT_DIR), "--clean"],
-        [
-            "npx",
-            "--yes",
-            "allure-commandline",
-            "generate",
-            str(ALLURE_RESULTS_DIR),
-            "-o",
-            str(ALLURE_REPORT_DIR),
-            "--clean",
-        ],
-    ]
+    allure_exe = shutil.which("allure")
+    npx_exe = shutil.which("npx")
+    commands: list[list[str]] = []
+    if allure_exe:
+        commands.append(
+            [allure_exe, "generate", str(ALLURE_RESULTS_DIR), "-o", str(ALLURE_REPORT_DIR), "--clean"]
+        )
+    if npx_exe:
+        commands.append(
+            [
+                npx_exe,
+                "--yes",
+                "allure-commandline",
+                "generate",
+                str(ALLURE_RESULTS_DIR),
+                "-o",
+                str(ALLURE_REPORT_DIR),
+                "--clean",
+            ]
+        )
+
     for cmd in commands:
-        if cmd[0] != "npx" and not shutil.which(cmd[0]):
-            continue
-        if cmd[0] == "npx" and not shutil.which("npx"):
-            continue
         try:
             result = subprocess.run(
                 cmd,
