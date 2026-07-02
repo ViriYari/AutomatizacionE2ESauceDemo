@@ -1,0 +1,37 @@
+# Maven / Serenity
+serenity-bdd-java/target/
+
+# Python / Playwright
+playwright-python/.venv/
+playwright-python/.pytest_cache/
+playwright-python/reports/
+playwright-python/**/__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.eggs/
+dist/
+build/
+
+# IDE
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+.project
+.classpath
+.settings/
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs
+*.log
+
+# Entorno local (no commitear secretos)
+.env
+.env.local
+*.env

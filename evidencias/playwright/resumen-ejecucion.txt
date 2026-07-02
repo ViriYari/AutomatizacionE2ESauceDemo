@@ -1,0 +1,14 @@
+Playwright - Resumen de ejecucion local
+=========================================
+
+Fecha referencia: Junio 2026
+Resultado: 2 passed
+
+Escenarios:
+1. test_el_sistema_impide_el_acceso_a_un_usuario_bloqueado
+2. test_ordenar_productos_por_precio_de_menor_a_mayor
+
+Reporte HTML: playwright-python/reports/report.html
+Screenshots en fallo: playwright-python/reports/screenshots/
+
+Comando: cd playwright-python && pytest
