@@ -53,6 +53,7 @@ pipeline {
         SERENITY_REPORTS_DIR   = "${SERENITY_DIR}/target/site/serenity"
         SUREFIRE_REPORTS_DIR   = "${SERENITY_DIR}/target/surefire-reports"
         PLAYWRIGHT_REPORTS_DIR = "${PLAYWRIGHT_DIR}/reports"
+        PLAYWRIGHT_TEST_RESULTS  = "${PLAYWRIGHT_DIR}/test-results"
         MAVEN_OPTS             = '-Xmx2048m -XX:MaxMetaspaceSize=512m'
     }
 
@@ -181,6 +182,7 @@ pipeline {
                                     pip install -r requirements.txt
                                     playwright install chromium
                                     pytest
+                                    python scripts/build_allure_report.py || echo "ADVERTENCIA: Allure HTML no generado"
                                 '''
                             } else {
                                 bat """
@@ -201,6 +203,8 @@ pipeline {
                                     playwright install chromium
                                     pytest
                                     if errorlevel 1 exit /b 1
+                                    python scripts\\build_allure_report.py
+                                    if errorlevel 1 echo ADVERTENCIA: Allure HTML no generado, revisar reports/allure-results
                                     exit /b 0
 
                                     :resolve_python
@@ -233,6 +237,14 @@ pipeline {
                 }
 
                 catchError(buildResult: null, stageResult: 'UNSTABLE') {
+                    junit(
+                        testResults: "${env.PLAYWRIGHT_REPORTS_DIR}/junit.xml",
+                        allowEmptyResults: true,
+                        skipPublishingChecks: true
+                    )
+                }
+
+                catchError(buildResult: null, stageResult: 'UNSTABLE') {
                     publishHTML(target: [
                         allowMissing          : true,
                         alwaysLinkToLastBuild : true,
@@ -255,6 +267,18 @@ pipeline {
                         reportTitles          : 'Playwright Report'
                     ])
                 }
+
+                catchError(buildResult: null, stageResult: 'UNSTABLE') {
+                    publishHTML(target: [
+                        allowMissing          : true,
+                        alwaysLinkToLastBuild : true,
+                        keepAll               : true,
+                        reportDir             : "${env.PLAYWRIGHT_REPORTS_DIR}/allure-report",
+                        reportFiles           : 'index.html',
+                        reportName            : 'Playwright Allure Report',
+                        reportTitles          : 'Allure Report'
+                    ])
+                }
             }
         }
 
@@ -262,7 +286,7 @@ pipeline {
             steps {
                 catchError(buildResult: null, stageResult: 'UNSTABLE') {
                     archiveArtifacts(
-                        artifacts: "${env.SERENITY_REPORTS_DIR}/**/*,${env.SUREFIRE_REPORTS_DIR}/**/*,${env.PLAYWRIGHT_REPORTS_DIR}/**/*",
+                        artifacts: "${env.SERENITY_REPORTS_DIR}/**/*,${env.SUREFIRE_REPORTS_DIR}/**/*,${env.PLAYWRIGHT_REPORTS_DIR}/**/*,${env.PLAYWRIGHT_TEST_RESULTS}/**/*",
                         fingerprint: true,
                         allowEmptyArchive: true,
                         onlyIfSuccessful: false

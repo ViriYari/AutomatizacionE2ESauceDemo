@@ -1,8 +1,8 @@
 Playwright - Resumen de ejecucion local
 =========================================
 
-Fecha referencia: Junio 2026
-Resultado: 2 passed
+Fecha: 01-07-2026 21:43
+Resultado: 2 passed in 28.01s
 
 Escenarios:
 1. test_el_sistema_impide_el_acceso_a_un_usuario_bloqueado

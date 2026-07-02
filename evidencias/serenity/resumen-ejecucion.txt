@@ -1,13 +1,9 @@
-Serenity report generated 01-07-2026 18:39:05
+Serenity report generated 01-07-2026 21:48:28
 
 Test Cases:         3
 Passed:             3
 Failed:             0
 Failed with errors: 0
-Compromised:        0
-Pending:            0
-Ignored:            0
-Skipped:            0
 
 Escenarios ejecutados:
 1. Inicio de sesion exitoso con credenciales validas (@Login)
@@ -15,5 +11,6 @@ Escenarios ejecutados:
 3. Completar el proceso de checkout exitosamente (@CheckOut)
 
 Reporte HTML: serenity-bdd-java/target/site/serenity/index.html
+Reporte existe: True
 
-Comando: cd serenity-bdd-java && mvn clean test
+Comando: cd serenity-bdd-java && mvn clean test -Denvironment=ci

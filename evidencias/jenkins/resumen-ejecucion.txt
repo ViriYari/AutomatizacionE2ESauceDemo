@@ -1,0 +1,22 @@
+Jenkins - Resumen de ejecucion CI/CD
+====================================
+
+Estado pipeline: SUCCESS
+Stage 1 Serenity: 3/3 passed
+Stage 2 Playwright: 2/2 passed
+
+Stages ejecutados:
+- Checkout
+- Verificar entorno
+- Stage 1: Ejecucion Serenity (mvn clean test)
+- Stage 2: Ejecucion Playwright (pytest + playwright install chromium)
+- Publicar reportes (Serenity BDD Report + Playwright Report)
+- Archivar evidencias
+
+Configuracion aplicada:
+- Maven-3.9 (Global Tool Configuration)
+- Python en agente Windows
+- Branch: main
+- Script Path: Jenkinsfile
+
+Repositorio: https://github.com/ViriYari/AutomatizacionE2ESauceDemo

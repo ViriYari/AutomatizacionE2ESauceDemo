@@ -30,7 +30,7 @@ automation-e2e-saucedemo/
 
 | Requisito | Versión mínima |
 |-----------|----------------|
-| Java JDK | 11 |
+| Java JDK | 21 |
 | Apache Maven | 3.8+ |
 | Google Chrome | Última estable |
 | ChromeDriver | Automático (`autodriver=true` en Serenity) |
@@ -48,7 +48,7 @@ automation-e2e-saucedemo/
 | Requisito |
 |-----------|
 | Jenkins con plugins: Pipeline, HTML Publisher, JUnit, Workspace Cleanup |
-| JDK 11 y Maven 3.9 configurados en *Global Tool Configuration* |
+| JDK 21 y Maven 3.9 configurados en *Global Tool Configuration* |
 | Python 3 disponible en el agente |
 | Chrome/Chromium en el agente (headless) |
 
@@ -126,6 +126,10 @@ pytest
 ```
 
 **Reporte HTML:** `playwright-python/reports/report.html`  
+**JUnit XML (Jenkins/CI):** `playwright-python/reports/junit.xml`  
+**Allure Report:** `playwright-python/reports/allure-report/index.html` (requiere Allure CLI o Node.js)  
+**Allure raw results:** `playwright-python/reports/allure-results/`  
+**Traces (fallos):** `playwright-python/test-results/` → abrir con `playwright show-trace <trace.zip>`  
 **Screenshots en fallo:** `playwright-python/reports/screenshots/`
 
 ---

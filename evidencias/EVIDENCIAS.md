@@ -8,6 +8,9 @@
 
 ## 1. Resumen ejecutivo
 
+> **PDF de entrega:** [`EVIDENCIAS-Reto2-E2E-SauceDemo.pdf`](EVIDENCIAS-Reto2-E2E-SauceDemo.pdf)  
+> Regenerar: `python evidencias/generar_evidencias_pdf.py` (requiere pruebas ejecutadas y venv Playwright).
+
 | Métrica | Valor |
 |---------|-------|
 | Total escenarios BDD | 5 |
@@ -198,7 +201,8 @@ pytest
 | Checkout | Clona el repositorio |
 | Verificar entorno | Valida Java, Maven, Python |
 | **Stage 1: Ejecución Serenity** | `mvn clean test` en `serenity-bdd-java/` |
-| **Stage 2: Ejecución Playwright** | `pytest` en `playwright-python/` |
+| **Stage 2: Ejecución Playwright** | `pytest` en `playwright-python/` — **2/2 passed** |
+| Pipeline completo | **SUCCESS** (Stage 1 + Stage 2) |
 | Publicar reportes | HTML Publisher (Serenity + Playwright) |
 | Archivar evidencias | Artefactos de ambos frameworks |
 | post always | Limpieza del workspace |
@@ -216,7 +220,8 @@ Guardar en `evidencias/jenkins/`:
 | 5 | `05-playwright-report-link.png` | Enlace al reporte Playwright en Jenkins |
 | 6 | `06-archived-artifacts.png` | Artefactos archivados del build |
 
-> **Nota:** Ejecutar el pipeline en Jenkins y agregar las capturas en `evidencias/jenkins/` antes de la entrega final.
+> **Estado:** Pipeline ejecutado con éxito (Stage 1 + Stage 2).  
+> Opcional: agregar capturas PNG en `evidencias/jenkins/` y regenerar el PDF.
 
 ---
 
@@ -246,7 +251,9 @@ Guardar en `evidencias/jenkins/`:
 | Documento de evidencias | ✅ |
 | Escenarios BDD documentados | ✅ |
 | Evidencias ejecución local | ✅ (rutas documentadas) |
-| Capturas Jenkins | ☐ Pendiente — agregar en `evidencias/jenkins/` |
+| Pipeline Jenkins (Stage 1 + 2) | ✅ SUCCESS |
+| Capturas Jenkins PNG | ☐ Opcional — `evidencias/jenkins/` |
+| PDF evidencias | ✅ `evidencias/EVIDENCIAS-Reto2-E2E-SauceDemo.pdf` |
 
 ---
 

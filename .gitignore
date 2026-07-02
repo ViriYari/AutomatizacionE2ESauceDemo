@@ -5,6 +5,7 @@ serenity-bdd-java/target/
 playwright-python/.venv/
 playwright-python/.pytest_cache/
 playwright-python/reports/
+playwright-python/test-results/
 playwright-python/**/__pycache__/
 *.py[cod]
 *$py.class
