@@ -5,7 +5,7 @@
  * Jenkins — configuración requerida (Windows):
  *   1. Manage Jenkins → Global Tool Configuration → Maven → Add "Maven-3.9"
  *   2. Instalar Python 3.10+ y marcar "Add to PATH" (reiniciar servicio Jenkins)
- *   3. Job Pipeline: Branch */main, Script Path: Jenkinsfile
+ *   3. Job Pipeline: Branch Specifier main, Script Path: Jenkinsfile
  *
  * Plugins: Pipeline, Git, HTML Publisher, JUnit, Workspace Cleanup
  */
