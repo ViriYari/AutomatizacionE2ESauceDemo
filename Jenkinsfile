@@ -37,8 +37,8 @@ pipeline {
         )
         string(
             name: 'PYTHON_CMD',
-            defaultValue: 'py -3',
-            description: 'Comando Python en Windows (ej. py -3, python, C:\\Python311\\python.exe).'
+            defaultValue: 'auto',
+            description: 'Comando Python. Use "auto" para detectar, o ruta completa ej. C:\\Python312\\python.exe'
         )
         booleanParam(
             name: 'SKIP_CLEANUP',
@@ -80,8 +80,26 @@ pipeline {
                                 echo === Verificando entorno (Windows) ===
                                 java -version || echo ADVERTENCIA: Java no encontrado
                                 call mvn -version || echo ADVERTENCIA: Maven no encontrado
-                                ${params.PYTHON_CMD} --version || echo ADVERTENCIA: Python no encontrado
+                                call :resolve_python
+                                if errorlevel 1 (
+                                    echo ADVERTENCIA: Python no encontrado
+                                ) else (
+                                    echo Python detectado: %PYTHON_EXE%
+                                    %PYTHON_EXE% --version
+                                )
                                 exit /b 0
+
+                                :resolve_python
+                                if /I not "${params.PYTHON_CMD}"=="auto" (
+                                    set "PYTHON_EXE=${params.PYTHON_CMD}"
+                                    exit /b 0
+                                )
+                                where python >nul 2>&1 && set "PYTHON_EXE=python" && exit /b 0
+                                where py >nul 2>&1 && set "PYTHON_EXE=py -3" && exit /b 0
+                                if exist "C:\\Program Files\\Python312\\python.exe" set "PYTHON_EXE=C:\\Program Files\\Python312\\python.exe" && exit /b 0
+                                if exist "C:\\Program Files\\Python311\\python.exe" set "PYTHON_EXE=C:\\Program Files\\Python311\\python.exe" && exit /b 0
+                                if exist "C:\\Program Files\\Python310\\python.exe" set "PYTHON_EXE=C:\\Program Files\\Python310\\python.exe" && exit /b 0
+                                exit /b 1
                             """
                         }
                     }
@@ -166,7 +184,16 @@ pipeline {
                                 '''
                             } else {
                                 bat """
-                                    ${params.PYTHON_CMD} -m venv .venv
+                                    @echo off
+                                    call :resolve_python
+                                    if errorlevel 1 (
+                                        echo ERROR: Python no encontrado en el agente Jenkins.
+                                        echo Instala Python 3.10+ para todos los usuarios, agrega al PATH del sistema y reinicia el servicio Jenkins.
+                                        echo O ejecuta con PYTHON_CMD = ruta completa a python.exe
+                                        exit /b 1
+                                    )
+                                    echo Usando Python: %PYTHON_EXE%
+                                    %PYTHON_EXE% -m venv .venv
                                     if errorlevel 1 exit /b 1
                                     call .venv\\Scripts\\activate.bat
                                     pip install --upgrade pip
@@ -174,6 +201,19 @@ pipeline {
                                     playwright install chromium
                                     pytest
                                     if errorlevel 1 exit /b 1
+                                    exit /b 0
+
+                                    :resolve_python
+                                    if /I not "${params.PYTHON_CMD}"=="auto" (
+                                        set "PYTHON_EXE=${params.PYTHON_CMD}"
+                                        exit /b 0
+                                    )
+                                    where python >nul 2>&1 && set "PYTHON_EXE=python" && exit /b 0
+                                    where py >nul 2>&1 && set "PYTHON_EXE=py -3" && exit /b 0
+                                    if exist "C:\\Program Files\\Python312\\python.exe" set "PYTHON_EXE=C:\\Program Files\\Python312\\python.exe" && exit /b 0
+                                    if exist "C:\\Program Files\\Python311\\python.exe" set "PYTHON_EXE=C:\\Program Files\\Python311\\python.exe" && exit /b 0
+                                    if exist "C:\\Program Files\\Python310\\python.exe" set "PYTHON_EXE=C:\\Program Files\\Python310\\python.exe" && exit /b 0
+                                    exit /b 1
                                 """
                             }
                         }
@@ -238,7 +278,8 @@ pipeline {
         }
 
         failure {
-            echo 'Pipeline fallido. Verifica Maven (Global Tool Configuration) y Python en el agente Jenkins.'
+            echo 'Pipeline fallido. Stage 1 (Serenity) o Stage 2 (Playwright) tuvo errores.'
+            echo 'Si Serenity paso: instala Python para todos los usuarios y reinicia Jenkins, o usa PYTHON_CMD con ruta completa.'
         }
 
         always {
