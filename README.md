@@ -130,11 +130,20 @@ pytest
 
 ---
 
-### Pipeline Jenkins
+### Jenkins (CI/CD del reto)
 
-1. Crear un job tipo **Pipeline** apuntando al `Jenkinsfile` de la raíz.
-2. Configurar herramientas `JDK-11` y `Maven-3.9` (ajustar nombres si difieren).
-3. Ejecutar el build.
+1. Crear un job tipo **Pipeline** en Jenkins.
+2. **Pipeline script from SCM** → URL del repositorio Git.
+3. **Script Path:** `Jenkinsfile` (J mayúscula, en la raíz del repo).
+4. **Branch:** `main`
+5. Ejecutar **Build Now**.
+
+**Plugins requeridos:** Pipeline, Git, HTML Publisher, JUnit, Workspace Cleanup
+
+**En el agente Jenkins:** Java 11+, Maven 3.8+, Python 3.10+, Chrome/Chromium
+
+> El bloque `tools { jdk / maven }` en el Jenkinsfile está comentado por defecto.
+> Descoméntalo si tienes `JDK-11` y `Maven-3.9` configurados en *Global Tool Configuration*.
 
 **Stages obligatorios del reto:**
 
